@@ -41,6 +41,33 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
+fun tinyRemapperArgsList(): List<String> {
+    return listOf(
+        "{input}",
+        "{output}",
+        "{mappings}",
+        "{from}",
+        "{to}",
+        "--fixpackageaccess",
+        "--renameinvalidlocals",
+        "--threads=1",
+        "--rebuildsourcefilenames"
+    )
+}
+
+fun createTinyRemapperArgs(input: String, output: String, mappings: String, from: String, to: String): List<String> {
+    return tinyRemapperArgsList().map {
+        when (it) {
+            "{input}" -> input
+            "{output}" -> output
+            "{mappings}" -> mappings
+            "{from}" -> from
+            "{to}" -> to
+            else -> it
+        }
+    }
+}
+
 abstract class RemapJar : BaseTask() {
 
     @get:InputFile
@@ -55,14 +82,8 @@ abstract class RemapJar : BaseTask() {
     @get:Input
     abstract val toNamespace: Property<String>
 
-    @get:Input
-    abstract val rebuildSourceFilenames: Property<Boolean>
-
     @get:Internal
     abstract val jvmargs: ListProperty<String>
-
-    @get:Internal
-    abstract val singleThreaded: Property<Boolean>
 
     @get:Classpath
     abstract val remapper: ConfigurableFileCollection
@@ -72,9 +93,7 @@ abstract class RemapJar : BaseTask() {
 
     override fun init() {
         outputJar.convention(defaultOutput())
-        singleThreaded.convention(true)
         jvmargs.convention(listOf("-Xmx1G"))
-        rebuildSourceFilenames.convention(true)
     }
 
     @TaskAction
@@ -82,21 +101,13 @@ abstract class RemapJar : BaseTask() {
         val logFile = layout.cache.resolve(paperTaskOutput("log"))
         ensureDeleted(logFile)
 
-        val args = mutableListOf(
+        val args = createTinyRemapperArgs(
             inputJar.path.absolutePathString(),
             outputJar.path.absolutePathString(),
             mappingsFile.path.absolutePathString(),
             fromNamespace.get(),
             toNamespace.get(),
-            "--fixpackageaccess",
-            "--renameinvalidlocals"
         )
-        if (singleThreaded.get()) {
-            args += "--threads=1"
-        }
-        if (rebuildSourceFilenames.get()) {
-            args += "--rebuildsourcefilenames"
-        }
 
         ensureParentExists(logFile)
         runJar(remapper, layout.cache, logFile, jvmArgs = jvmargs.get(), args = args.toTypedArray())

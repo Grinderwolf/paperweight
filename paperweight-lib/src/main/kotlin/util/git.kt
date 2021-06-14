@@ -42,9 +42,9 @@ class Git(private var repo: Path) {
     }
 
     operator fun invoke(vararg args: String): Command {
-        val cmd = arrayOf("git", "-c", "commit.gpgsign=false", "-c", "core.safecrlf=false", *args)
+        val cmd = listOf("git", "-c", "commit.gpgsign=false", "-c", "core.safecrlf=false", *args)
         return try {
-            Command(ProcessBuilder(*cmd).directory(repo).start(), cmd.joinToString(separator = " "))
+            Command(ProcessBuilder(cmd).directory(repo).start(), cmd.joinToString(separator = " "))
         } catch (e: IOException) {
             throw PaperweightException("Failed to execute command: ${cmd.joinToString(separator = " ")}", e)
         }

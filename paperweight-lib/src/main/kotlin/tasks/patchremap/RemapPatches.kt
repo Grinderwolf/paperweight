@@ -28,7 +28,7 @@ import io.papermc.paperweight.util.Git
 import io.papermc.paperweight.util.MappingFormats
 import io.papermc.paperweight.util.McDev
 import io.papermc.paperweight.util.cache
-import io.papermc.paperweight.util.copyRecursively
+import io.papermc.paperweight.util.copyRecursivelyTo
 import io.papermc.paperweight.util.deleteRecursively
 import io.papermc.paperweight.util.path
 import java.nio.file.Path
@@ -230,7 +230,7 @@ abstract class RemapPatches : BaseTask() {
             if (recreate) {
                 deleteRecursively()
                 createDirectories()
-                source?.copyRecursively(this)
+                source?.copyRecursivelyTo(this)
             }
         }
     }

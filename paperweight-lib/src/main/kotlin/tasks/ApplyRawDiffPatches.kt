@@ -23,7 +23,7 @@
 package io.papermc.paperweight.tasks
 
 import io.papermc.paperweight.util.Git
-import io.papermc.paperweight.util.copyRecursively
+import io.papermc.paperweight.util.copyRecursivelyTo
 import io.papermc.paperweight.util.defaultOutput
 import io.papermc.paperweight.util.path
 import io.papermc.paperweight.util.pathOrNull
@@ -48,7 +48,7 @@ abstract class ApplyRawDiffPatches : ZippedTask() {
 
     override fun run(rootDir: Path) {
         val input = inputDir.path
-        input.copyRecursively(rootDir)
+        input.copyRecursivelyTo(rootDir)
 
         val patches = patchDir.pathOrNull ?: return
         val patchSet = patches.useDirectoryEntries("*.patch") { it.toMutableList() }
